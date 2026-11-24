@@ -1,0 +1,188 @@
+﻿-- AppointmentOPD | SQL Server
+-- Extracted from uploaded script.sql; source statements retained.
+-- 12 CREATE TABLE statements from source.
+CREATE TABLE [dbo].[Department](
+	[DepartmentID] [int] IDENTITY(1,1) NOT NULL,
+	[DepartmentName] [nvarchar](100) NOT NULL,
+	[Description] [nvarchar](255) NULL,
+ CONSTRAINT [PK__DepartmentID] PRIMARY KEY CLUSTERED 
+(
+	[DepartmentID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UQ_DepartmentName] UNIQUE NONCLUSTERED 
+(
+	[DepartmentName] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[Doctor](
+	[DoctorID] [int] IDENTITY(1,1) NOT NULL,
+	[DoctorName] [nvarchar](150) NOT NULL,
+	[Specialty] [nvarchar](100) NOT NULL,
+	[Phone] [varchar](15) NULL,
+	[DepartmentID] [int] NOT NULL,
+ CONSTRAINT [PK__DoctorID] PRIMARY KEY CLUSTERED 
+(
+	[DoctorID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[Patient](
+	[PatientID] [int] IDENTITY(1,1) NOT NULL,
+	[HN] [varchar](20) NOT NULL,
+	[CitizenID] [varchar](20) MASKED WITH (FUNCTION = 'partial(0, "XXXXXXXXX", 4)') NOT NULL,
+	[PatientName] [nvarchar](150) NOT NULL,
+	[Gender] [nvarchar](20) NOT NULL,
+	[DateOfBirth] [date] NOT NULL,
+	[Phone] [varchar](15) MASKED WITH (FUNCTION = 'partial(0, "XXXXXXX", 4)') NULL,
+	[Address] [nvarchar](255) MASKED WITH (FUNCTION = 'default()') NULL,
+	[NoShowCount] [int] NOT NULL,
+	[OnlineBookingBlockedUntil] [datetime2](0) NULL,
+ CONSTRAINT [PK__PatientID] PRIMARY KEY CLUSTERED 
+(
+	[PatientID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UQ_CitizenID] UNIQUE NONCLUSTERED 
+(
+	[CitizenID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UQ_HN] UNIQUE NONCLUSTERED 
+(
+	[HN] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[Appointment](
+	[AppointmentID] [int] IDENTITY(1,1) NOT NULL,
+	[PatientID] [int] NOT NULL,
+	[DoctorID] [int] NOT NULL,
+	[DepartmentID] [int] NOT NULL,
+	[AppointmentDate] [date] NOT NULL,
+	[AppointmentTime] [time](7) NOT NULL,
+	[AppointmentStatus] [nvarchar](30) NOT NULL,
+	[CreatedAt] [datetime] NOT NULL,
+ CONSTRAINT [PK__AppointmentID] PRIMARY KEY CLUSTERED 
+(
+	[AppointmentID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[Visit](
+	[VisitID] [int] IDENTITY(1,1) NOT NULL,
+	[PatientID] [int] NOT NULL,
+	[DoctorID] [int] NOT NULL,
+	[AppointmentID] [int] NULL,
+	[VisitDate] [datetime] NOT NULL,
+	[Weight] [decimal](5, 2) NOT NULL,
+	[BloodPressure] [nvarchar](20) NOT NULL,
+	[Temperature] [decimal](4, 1) NOT NULL,
+	[Symptoms] [nvarchar](500) NOT NULL,
+	[Diagnosis] [nvarchar](500) NOT NULL,
+	[ICD10Code] [varchar](10) NULL,
+ CONSTRAINT [PK__VisitID] PRIMARY KEY CLUSTERED 
+(
+	[VisitID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[Drug](
+	[DrugID] [int] IDENTITY(1,1) NOT NULL,
+	[DrugName] [nvarchar](150) NOT NULL,
+	[DrugDescription] [nvarchar](255) NULL,
+	[Unit] [nvarchar](50) NOT NULL,
+	[StockQuantity] [int] NOT NULL,
+	[Price] [decimal](10, 2) NOT NULL,
+	[ExpiryDate] [date] NOT NULL,
+ CONSTRAINT [PK__DrugID] PRIMARY KEY CLUSTERED 
+(
+	[DrugID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[Prescription](
+	[PrescriptionID] [int] IDENTITY(1,1) NOT NULL,
+	[VisitID] [int] NOT NULL,
+	[DoctorID] [int] NOT NULL,
+	[PrescriptionDate] [datetime] NOT NULL,
+ CONSTRAINT [PK__PrescriptionID] PRIMARY KEY CLUSTERED 
+(
+	[PrescriptionID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[PrescriptionDetail](
+	[PrescriptionDetailID] [int] IDENTITY(1,1) NOT NULL,
+	[PrescriptionID] [int] NOT NULL,
+	[DrugID] [int] NOT NULL,
+	[Dosage] [nvarchar](100) NOT NULL,
+	[Frequency] [nvarchar](100) NOT NULL,
+	[Duration] [nvarchar](100) NOT NULL,
+	[Quantity] [int] NOT NULL,
+ CONSTRAINT [PK__PrescriptionDetailID] PRIMARY KEY CLUSTERED 
+(
+	[PrescriptionDetailID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[AuditLog](
+	[AuditID] [bigint] IDENTITY(1,1) NOT NULL,
+	[TableName] [nvarchar](100) NOT NULL,
+	[RecordID] [int] NOT NULL,
+	[ActionType] [nvarchar](20) NOT NULL,
+	[ChangedBy] [nvarchar](128) NOT NULL,
+	[ChangedAt] [datetime2](0) NOT NULL,
+	[OldData] [nvarchar](max) NULL,
+	[NewData] [nvarchar](max) NULL,
+ CONSTRAINT [PK__AuditID] PRIMARY KEY CLUSTERED 
+(
+	[AuditID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+CREATE TABLE [dbo].[DoctorSchedule](
+	[ScheduleID] [int] IDENTITY(1,1) NOT NULL,
+	[DoctorID] [int] NOT NULL,
+	[WorkDate] [date] NOT NULL,
+	[StartTime] [time](7) NOT NULL,
+	[EndTime] [time](7) NOT NULL,
+ CONSTRAINT [PK__ScheduleID] PRIMARY KEY CLUSTERED 
+(
+	[ScheduleID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UQ_DoctorSchedule] UNIQUE NONCLUSTERED 
+(
+	[DoctorID] ASC,
+	[WorkDate] ASC,
+	[StartTime] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[PatientAccessLog](
+	[AccessID] [bigint] IDENTITY(1,1) NOT NULL,
+	[PatientID] [int] NOT NULL,
+	[AccessedBy] [nvarchar](128) NOT NULL,
+	[AccessedAt] [datetime2](0) NOT NULL,
+	[AccessType] [nvarchar](50) NOT NULL,
+	[AccessStatus] [nvarchar](20) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[AccessID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[PatientAllergy](
+	[AllergyID] [int] IDENTITY(1,1) NOT NULL,
+	[PatientID] [int] NOT NULL,
+	[AllergyName] [nvarchar](150) NOT NULL,
+	[Reaction] [nvarchar](255) NOT NULL,
+	[RecordedAt] [datetime] NOT NULL,
+ CONSTRAINT [PK__AllergyID] PRIMARY KEY CLUSTERED 
+(
+	[AllergyID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UQ_PatientAllergy] UNIQUE NONCLUSTERED 
+(
+	[PatientID] ASC,
+	[AllergyName] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
